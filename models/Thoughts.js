@@ -1,4 +1,4 @@
-const { Schema, model } = require("mongoose");
+const { Schema, model, mongoose } = require("mongoose");
 const dayjs = require("dayjs");
 const User = require("./User");
 
@@ -7,7 +7,6 @@ const ReactionSchema = new Schema(
   {
     reactionId: {
       type: Schema.Types.ObjectId,
-      default: () => new mongoose.Types.ObjectId(),
     },
     reactionBody: {
       type: String,
@@ -28,6 +27,7 @@ const ReactionSchema = new Schema(
     toJSON: {
       getters: true,
     },
+    id: false,
   }
 );
 
@@ -62,14 +62,16 @@ const thoughtsSchema = new Schema(
   }
 );
 
-thoughtsSchema.virtual("username").get(function () {
-  return User.findById(this.userId).then((user) => user.username);
+thoughtsSchema.virtual("username").get(async function () {
+  const User = require("./User");
+  const user = await User.findById(this.userId);
+  return user.username;
 });
 
 thoughtsSchema.virtual("reactionCount").get(function () {
   return this.reactions.length;
 });
 
-const Thoughts = model("Thoughts", thoughtsSchema);
+const Thoughts = model("thoughts", thoughtsSchema);
 
 module.exports = Thoughts;
